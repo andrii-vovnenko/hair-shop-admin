@@ -16,10 +16,15 @@ import {
   PlusOutlined, 
   InboxOutlined 
 } from '@ant-design/icons';
-import { apiService, type CreateVariantRequest, type CreateColorRequest, type Product, type Color } from '../services/api';
+import { apiService, type CreateVariantRequest, type CreateColorRequest, type Product, type Color, COLOR_CATEGORIES } from '../services/api';
 
 const { Option } = Select;
 const { Dragger } = Upload;
+
+const COLOR_CATEGORY_OPTIONS = [
+  { label: 'Світлий', value: COLOR_CATEGORIES.LIGHT },
+  { label: 'Темний', value: COLOR_CATEGORIES.DARK }
+];
 
 interface AddVariantProps {
   preselectedProductId?: string;
@@ -178,13 +183,13 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
             </Select>
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             label="SKU"
             name="sku"
             rules={[{ required: true, message: 'Please input SKU!' }]}
           >
             <Input placeholder="Enter SKU" />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
             label="Price"
@@ -241,25 +246,23 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
                 }}
               >
                {colors.map(color => (
-  <Option key={color.id} value={color.name}>
-    <Space style={{ justifyContent: 'space-between', width: '100%' }}>
-      <span>{color.display_name || color.name}</span>
-      <Button
-        type="link"
-        danger
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation(); // щоб не вибирався елемент
-          handleColorDelete(color.id);
-        }}
-      >
-        Delete
-      </Button>
-    </Space>
-  </Option>
-))}
-
-
+                  <Option key={color.id} value={color.name}>
+                    <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+                      <span>{`${color.display_name} ${color.name || ''}`}</span>
+                      <Button
+                        type="link"
+                        danger
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation(); // щоб не вибирався елемент
+                          handleColorDelete(color.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Space>
+                  </Option>
+                ))}
               </Select>
             </Space.Compact>
           </Form.Item>
@@ -340,10 +343,9 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
             label="Color Category"
             name="color_category"
           >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="Enter color category number"
-              min={0}
+            <Select
+              placeholder="Select color category"
+              options={COLOR_CATEGORY_OPTIONS}
             />
           </Form.Item>
 

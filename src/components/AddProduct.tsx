@@ -1,9 +1,33 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, message, InputNumber } from 'antd';
+import { Form, Input, Button, Card, message, InputNumber, Select } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { apiService, type CreateProductRequest } from '../services/api';
+import { apiService, type CreateProductRequest, HAIR_TYPES } from '../services/api';
 
 const { TextArea } = Input;
+
+const PRODUCT_CATEGORIES = {
+  WIGS: 1,
+  TAILS: 2,
+  TOPPERS: 3
+};
+
+const CATEGORY_NAMES = {
+  [PRODUCT_CATEGORIES.WIGS]: 'Перукт',
+  [PRODUCT_CATEGORIES.TAILS]: 'Хвости',
+  [PRODUCT_CATEGORIES.TOPPERS]: 'Топпера'
+};
+
+const PRODUCT_CATEGORIES_OPTIONS = Object.entries(PRODUCT_CATEGORIES).map(([, value]) => ({
+  label: CATEGORY_NAMES[value],
+  value: value
+}));
+
+const HAIR_TYPE_OPTIONS = [
+  { label: 'Натуральний', value: HAIR_TYPES.NATURAL },
+  { label: 'Синтетичний', value: HAIR_TYPES.SYNTHETIC }
+];
+
+console.log(PRODUCT_CATEGORIES_OPTIONS);
 
 const AddProduct: React.FC = () => {
   const [form] = Form.useForm();
@@ -63,7 +87,10 @@ const AddProduct: React.FC = () => {
           label="Type"
           name="type"
         >
-          <Input placeholder="Enter product type" />
+          <Select
+            placeholder="Select hair type"
+            options={HAIR_TYPE_OPTIONS}
+          />
         </Form.Item>
 
         <Form.Item
@@ -106,7 +133,7 @@ const AddProduct: React.FC = () => {
           name="category_id"
           rules={[{ required: true, message: 'Please input category ID!' }]}
         >
-          <Input placeholder="Enter category ID" />
+          <Select placeholder="Enter category ID" options={PRODUCT_CATEGORIES_OPTIONS} />
         </Form.Item>
 
         <Form.Item>

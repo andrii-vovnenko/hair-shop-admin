@@ -13,7 +13,8 @@ import {
   Col,
   Tag,
   Table,
-  Popconfirm
+  Popconfirm,
+  Select
 } from 'antd';
 import { 
   SaveOutlined, 
@@ -22,11 +23,33 @@ import {
   DeleteOutlined,
   PlusOutlined
 } from '@ant-design/icons';
-import { apiService } from '../services/api';
+import { apiService, HAIR_TYPES } from '../services/api';
 import type { Product, Variant, UpdateProductRequest } from '../services/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
+
+const PRODUCT_CATEGORIES = {
+  WIGS: 1,
+  TAILS: 2,
+  TOPPERS: 3
+};
+
+const CATEGORY_NAMES = {
+  [PRODUCT_CATEGORIES.WIGS]: 'Перукт',
+  [PRODUCT_CATEGORIES.TAILS]: 'Хвости',
+  [PRODUCT_CATEGORIES.TOPPERS]: 'Топпера'
+};
+
+const PRODUCT_CATEGORIES_OPTIONS = Object.entries(PRODUCT_CATEGORIES).map(([, value]) => ({
+  label: CATEGORY_NAMES[value],
+  value: value
+}));
+
+const HAIR_TYPE_OPTIONS = [
+  { label: 'Натуральний', value: HAIR_TYPES.NATURAL },
+  { label: 'Синтетичний', value: HAIR_TYPES.SYNTHETIC }
+];
 
 interface ProductDetailProps {
   productId: string;
@@ -261,7 +284,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack, onVari
                     label="Type"
                     name="type"
                   >
-                    <Input placeholder="Enter product type" />
+                    <Select
+                      placeholder="Select hair type"
+                      options={HAIR_TYPE_OPTIONS}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -331,7 +357,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack, onVari
                 name="category_id"
                 rules={[{ required: true, message: 'Please input category ID!' }]}
               >
-                <Input placeholder="Enter category ID" />
+                <Select placeholder="Enter category ID" options={PRODUCT_CATEGORIES_OPTIONS} />
               </Form.Item>
 
               <Form.Item>
@@ -361,7 +387,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack, onVari
               <div>
                 <Text strong>Category:</Text>
                 <br />
-                <Tag color="blue">{product.category || 'N/A'}</Tag>
+                <Tag color="blue">{CATEGORY_NAMES[(product.category as unknown as number) as keyof typeof CATEGORY_NAMES] || 'N/A'}</Tag>
               </div>
               <div>
                 <Text strong>Variants:</Text>

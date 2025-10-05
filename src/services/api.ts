@@ -48,6 +48,16 @@ export const getImageUrlByKey = (
   return `${bucketUrl}${filters ? `/${filters}` : ''}/${key}`
 }
 
+export const COLOR_CATEGORIES = {
+  LIGHT: 1,
+  DARK: 2
+} as const;
+
+export const HAIR_TYPES = {
+  NATURAL: 1,
+  SYNTHETIC: 2
+} as const;
+
 // Types based on the API documentation
 export interface Color {
   id: string;

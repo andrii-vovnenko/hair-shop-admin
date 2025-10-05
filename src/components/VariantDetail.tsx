@@ -28,10 +28,15 @@ import {
   EyeOutlined,
   PlusOutlined
 } from '@ant-design/icons';
-import { apiService, getImageUrlByKey } from '../services/api';
+import { apiService, getImageUrlByKey, COLOR_CATEGORIES } from '../services/api';
 import type { Variant, Product, UpdateVariantRequest, Color } from '../services/api';
 
 const { Title, Text } = Typography;
+
+const COLOR_CATEGORY_OPTIONS = [
+  { label: 'Light', value: COLOR_CATEGORIES.LIGHT },
+  { label: 'Dark', value: COLOR_CATEGORIES.DARK }
+];
 
 interface VariantDetailProps {
   variantId: string;
@@ -281,7 +286,7 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
                     label="SKU"
                     name="sku"
                   >
-                    <Input placeholder="Enter SKU" disabled />
+                    <Input placeholder="Enter SKU" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -314,7 +319,7 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
                     >
                       {colors.map(color => (
                         <Select.Option key={color.id} value={color.name}>
-                          {color.display_name || color.name}
+                          {`${color.display_name} ${color.name || ''}`} 
                         </Select.Option>
                       ))}
                     </Select>
@@ -521,10 +526,9 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
             label="Color Category"
             name="color_category"
           >
-            <InputNumber
-              style={{ width: '100%' }}
-              placeholder="Enter color category number"
-              min={0}
+            <Select
+              placeholder="Select color category"
+              options={COLOR_CATEGORY_OPTIONS}
             />
           </Form.Item>
 

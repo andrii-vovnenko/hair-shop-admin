@@ -25,6 +25,18 @@ import type { Product } from '../services/api';
 
 const { Title } = Typography;
 
+const PRODUCT_CATEGORIES = {
+  WIGS: 1,
+  TAILS: 2,
+  TOPPERS: 3
+};
+
+const CATEGORY_NAMES = {
+  [PRODUCT_CATEGORIES.WIGS]: 'Перукт',
+  [PRODUCT_CATEGORIES.TAILS]: 'Хвости',
+  [PRODUCT_CATEGORIES.TOPPERS]: 'Топпера'
+};
+
 interface AllProductsProps {
   onProductSelect?: (productId: string) => void;
   onNavigate?: (key: string) => void;
@@ -81,7 +93,7 @@ const AllProducts: React.FC<AllProductsProps> = ({ onProductSelect, onNavigate }
       dataIndex: 'category',
       key: 'category',
       render: (category: string) => (
-        <Tag color="blue">{category || 'N/A'}</Tag>
+        <Tag color="blue">{CATEGORY_NAMES[(category as unknown as number) as keyof typeof CATEGORY_NAMES] || 'N/A'}</Tag>
       ),
     },
     {
