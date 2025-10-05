@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'https://api.perukytyt.com';
+const bucketUrl = 'https://images.perukytyt.com/cdn-cgi/image';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,12 +10,52 @@ const api = axios.create({
   },
 });
 
+/**
+ * Get image URL by key
+ * @param {string} key - Image key
+ * @param {Object} options - Image options
+ * @param {number} options.width - Image width
+ * @param {number} options.height - Image height
+ * @param {number} options.blur - Image blur
+ * @param {number} options.quality - Image quality
+ * @param {string} options.format - Image format
+ * @returns {string} Image URL
+ */
+export const getImageUrlByKey = (
+  key: string,
+  {
+    width,
+    height,
+    blur,
+    quality = 80,
+    format = 'webp'
+  }: {
+    width?: number;
+    height?: number;
+    blur?: number;
+    quality?: number;
+    format?: string;
+  } = {}
+) => {
+  let filters = [
+    width && `width=${width}`,
+    height && `height=${height}`,
+    blur && `blur=${blur}`,
+    quality && `quality=${quality}`,
+    format && `format=${format}`
+  ].filter(Boolean).join(',')
+
+  return `${bucketUrl}${filters ? `/${filters}` : ''}/${key}`
+}
+
 // Types based on the API documentation
 export interface Color {
   id: string;
   name: string;
   display_name: string;
   color_category: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {
@@ -41,6 +82,7 @@ export interface Variant {
   color: string;
   stock_quantity: number;
   images: Image[];
+  old_price?: number;
 }
 
 export interface Image {
@@ -77,9 +119,34 @@ export interface CreateVariantRequest {
   images: File[];
 }
 
+export interface UpdateProductRequest {
+  name?: string;
+  display_name?: string;
+  description?: string;
+  short_description?: string;
+  type?: string;
+  length?: number;
+  base_price?: number;
+  base_promo_price?: number;
+  category_id?: string;
+}
+
+export interface UpdateVariantRequest {
+  sku?: string;
+  price?: number;
+  promo_price?: number;
+  color?: string;
+  stock_quantity?: number;
+}
+
 // API functions
 export const apiService = {
   // Colors
+  getColors: async (): Promise<Color[]> => {
+    const response = await api.get('/v1/colors');
+    return response.data.colors;
+  },
+
   createColor: async (data: CreateColorRequest): Promise<Color> => {
     const response = await api.post('/v1/colors', data);
     return response.data.color;
@@ -101,11 +168,26 @@ export const apiService = {
     return response.data.product;
   },
 
+  updateProduct: async (id: string, data: UpdateProductRequest): Promise<Product> => {
+    const response = await api.put(`/v1/products/${id}`, data);
+    return response.data.product;
+  },
+
   deleteProduct: async (id: string): Promise<void> => {
     await api.delete(`/v1/products/${id}`);
   },
 
   // Variants
+  getVariants: async (): Promise<Variant[]> => {
+    const response = await api.get('/v1/variants');
+    return response.data.variants;
+  },
+
+  getVariant: async (id: string): Promise<Variant> => {
+    const response = await api.get(`/v1/variants/${id}`);
+    return response.data.variant;
+  },
+
   createVariant: async (data: CreateVariantRequest): Promise<Variant> => {
     const formData = new FormData();
     formData.append('product_id', data.product_id);
@@ -126,6 +208,11 @@ export const apiService = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data.variant;
+  },
+
+  updateVariant: async (id: string, data: UpdateVariantRequest): Promise<Variant> => {
+    const response = await api.put(`/v1/variants/${id}`, data);
     return response.data.variant;
   },
 

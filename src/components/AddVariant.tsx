@@ -21,7 +21,11 @@ import { apiService, type CreateVariantRequest, type CreateColorRequest, type Pr
 const { Option } = Select;
 const { Dragger } = Upload;
 
-const AddVariant: React.FC = () => {
+interface AddVariantProps {
+  preselectedProductId?: string;
+}
+
+const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,9 +38,13 @@ const AddVariant: React.FC = () => {
   // Load products and colors on component mount
   useEffect(() => {
     loadProducts();
-    // Note: There's no API endpoint to get colors, so we'll start with an empty array
-    // Colors will be added dynamically when created
-  }, []);
+    loadColors();
+    
+    // Set preselected product if provided
+    if (preselectedProductId) {
+      form.setFieldValue('product_id', preselectedProductId);
+    }
+  }, [preselectedProductId]);
 
   const loadProducts = async () => {
     try {
@@ -47,14 +55,24 @@ const AddVariant: React.FC = () => {
     }
   };
 
+  const loadColors = async () => {
+    try {
+      const colorsData = await apiService.getColors();
+      setColors(colorsData);
+    } catch (error: any) {
+      message.error('Failed to load colors');
+    }
+  };
+
   const handleColorCreate = async (values: CreateColorRequest) => {
     setColorLoading(true);
     try {
-      const newColor = await apiService.createColor(values);
-      setColors(prev => [...prev, newColor]);
+      await apiService.createColor(values);
       message.success('Color created successfully!');
       colorForm.resetFields();
       setColorModalVisible(false);
+      // Reload colors to get the updated list
+      await loadColors();
     } catch (error: any) {
       message.error(error.response?.data?.error || 'Failed to create color');
     } finally {
