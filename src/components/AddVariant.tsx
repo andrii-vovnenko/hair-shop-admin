@@ -80,6 +80,24 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
     }
   };
 
+  const handleColorDelete = async (colorId: string) => {
+  Modal.confirm({
+    title: 'Ви впевнені, що хочете видалити цей колір?',
+    okText: 'Так',
+    cancelText: 'Ні',
+    onOk: async () => {
+      try {
+        await apiService.deleteColor(colorId);
+        message.success('Колір успішно видалено!');
+        await loadColors(); // оновити список
+      } catch (error: any) {
+        message.error(error.response?.data?.error || 'Не вдалося видалити колір');
+      }
+    },
+  });
+};
+
+
   const onFinish = async (values: CreateVariantRequest) => {
     if (fileList.length === 0) {
       message.error('Please upload at least one image');
@@ -222,11 +240,26 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
                   form.setFieldValue('color', value);
                 }}
               >
-                {colors.map(color => (
-                  <Option key={color.id} value={color.name}>
-                    {color.display_name || color.name}
-                  </Option>
-                ))}
+               {colors.map(color => (
+  <Option key={color.id} value={color.name}>
+    <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+      <span>{color.display_name || color.name}</span>
+      <Button
+        type="link"
+        danger
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation(); // щоб не вибирався елемент
+          handleColorDelete(color.id);
+        }}
+      >
+        Delete
+      </Button>
+    </Space>
+  </Option>
+))}
+
+
               </Select>
             </Space.Compact>
           </Form.Item>

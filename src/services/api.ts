@@ -152,6 +152,10 @@ export const apiService = {
     return response.data.color;
   },
 
+  deleteColor: async (id: string): Promise<void> => {
+  await api.delete(`/v1/colors/${id}`);
+},
+
   // Products
   getProducts: async (): Promise<Product[]> => {
     const response = await api.get('/v1/products');
