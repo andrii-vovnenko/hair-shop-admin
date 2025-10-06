@@ -39,6 +39,10 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
   const [colorForm] = Form.useForm();
   const [colorLoading, setColorLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [colorToDelete, setColorToDelete] = useState<string | null>(null);
+
+
 
   // Load products and colors on component mount
   useEffect(() => {
@@ -85,22 +89,12 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
     }
   };
 
-  const handleColorDelete = async (colorId: string) => {
-  Modal.confirm({
-    title: 'Ви впевнені, що хочете видалити цей колір?',
-    okText: 'Так',
-    cancelText: 'Ні',
-    onOk: async () => {
-      try {
-        await apiService.deleteColor(colorId);
-        message.success('Колір успішно видалено!');
-        await loadColors(); // оновити список
-      } catch (error: any) {
-        message.error(error.response?.data?.error || 'Не вдалося видалити колір');
-      }
-    },
-  });
+ const handleColorDelete = (colorId: string) => {
+  setColorToDelete(colorId);
+  setDeleteModalVisible(true);
 };
+
+
 
 
   const onFinish = async (values: CreateVariantRequest) => {
@@ -254,7 +248,7 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
                         danger
                         size="small"
                         onClick={(e) => {
-                          e.stopPropagation(); // щоб не вибирався елемент
+                          e.stopPropagation(); 
                           handleColorDelete(color.id);
                         }}
                       >
@@ -366,6 +360,29 @@ const AddVariant: React.FC<AddVariantProps> = ({ preselectedProductId }) => {
           </Form.Item>
         </Form>
       </Modal>
+      <Modal
+  title="Ви впевнені, що хочете видалити цей колір?"
+  open={deleteModalVisible}
+  onOk={async () => {
+    if (!colorToDelete) return;
+    try {
+      await apiService.deleteColor(colorToDelete);
+      message.success('Колір успішно видалено!');
+      await loadColors();
+    } catch (error: any) {
+      message.error(error.response?.data?.error || 'Не вдалося видалити колір');
+    } finally {
+      setDeleteModalVisible(false);
+      setColorToDelete(null);
+    }
+  }}
+  onCancel={() => {
+    setDeleteModalVisible(false);
+    setColorToDelete(null);
+  }}
+  okText="Так"
+  cancelText="Ні"
+/>
     </div>
   );
 };
