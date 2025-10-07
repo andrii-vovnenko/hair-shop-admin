@@ -256,6 +256,14 @@ export const apiService = {
   deleteImage: async (id: string): Promise<void> => {
     await api.delete(`/v1/images/${id}`);
   },
+
+  // Resort variant images
+  resortVariantImages: async (variantId: string, imageOrders: Array<{ id: string; sort_order: number }>): Promise<Image[]> => {
+    const response = await api.put(`/v1/variants/${variantId}/images/resort`, {
+      image_orders: imageOrders
+    });
+    return response.data.images;
+  },
 };
 
 export default api;
