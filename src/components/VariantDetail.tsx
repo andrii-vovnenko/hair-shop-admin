@@ -255,7 +255,7 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
             </Button>
           )}
           <Title level={2} style={{ margin: 0 }}>
-            Variant: {variant.sku}
+            Variant: {variant.color}
           </Title>
         </Space>
         {product && (
