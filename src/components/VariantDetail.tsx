@@ -13,9 +13,6 @@ import {
   Col,
   Tag,
   Upload,
-  Image,
-  Popconfirm,
-  Table,
   Select,
   Modal,
   Divider
@@ -23,13 +20,12 @@ import {
 import { 
   SaveOutlined, 
   ArrowLeftOutlined,
-  DeleteOutlined,
   UploadOutlined,
-  EyeOutlined,
   PlusOutlined
 } from '@ant-design/icons';
-import { apiService, getImageUrlByKey, COLOR_CATEGORIES } from '../services/api';
-import type { Variant, Product, UpdateVariantRequest, Color } from '../services/api';
+import { apiService, COLOR_CATEGORIES } from '../services/api';
+import type { Variant, Product, UpdateVariantRequest, Color, Image as ImageType } from '../services/api';
+import DraggableImageTable from './DraggableImageTable';
 
 const { Title, Text } = Typography;
 
@@ -153,77 +149,24 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
     }
   };
 
-  const imageColumns = [
-    {
-      title: 'Image',
-      dataIndex: 'url',
-      key: 'url',
-      render: (url: string) => {
-        // Extract the key from the URL (assuming the URL contains the image key)
-        const imageKey = url.split('/').pop() || url;
-        const optimizedUrl = getImageUrlByKey(imageKey, {
-          width: 60,
-          height: 60,
-          quality: 60, // Lower quality for thumbnails
-          format: 'webp'
-        });
-        
-        return (
-          <Image
-            width={60}
-            height={60}
-            src={optimizedUrl}
-            style={{ objectFit: 'cover', borderRadius: '4px' }}
-          />
-        );
-      },
-    },
-    {
-      title: 'Sort Order',
-      dataIndex: 'sort_order',
-      key: 'sort_order',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: any) => (
-        <Space>
-          <Button 
-            type="default" 
-            icon={<EyeOutlined />} 
-            size="small"
-            onClick={() => {
-              const imageKey = record.url.split('/').pop() || record.url;
-              const optimizedUrl = getImageUrlByKey(imageKey, {
-                width: 800,
-                height: 600,
-                quality: 80,
-                format: 'webp'
-              });
-              window.open(optimizedUrl, '_blank');
-            }}
-          >
-            View
-          </Button>
-          <Popconfirm
-            title="Are you sure you want to delete this image?"
-            onConfirm={() => handleDeleteImage(record.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button 
-              type="primary" 
-              danger 
-              icon={<DeleteOutlined />} 
-              size="small"
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
+  const handleImageReorder = async (reorderedImages: ImageType[]) => {
+    try {
+      const imageOrders = reorderedImages.map((image, index) => ({
+        id: image.id,
+        sort_order: index + 1
+      }));
+      
+      const updatedImages = await apiService.resortVariantImages(variantId, imageOrders);
+      
+      // Update the variant with the new image order
+      setVariant(prev => prev ? { ...prev, images: updatedImages } : null);
+    } catch (error) {
+      message.error('Failed to update image order');
+      console.error('Error updating image order:', error);
+      throw error; // Re-throw to let the component handle the error
+    }
+  };
+
 
   if (loading) {
     return (
@@ -386,38 +329,31 @@ const VariantDetail: React.FC<VariantDetailProps> = ({ variantId, onBack }) => {
             </Form>
           </Card>
 
-          <Card title="Images">
-            <div style={{ marginBottom: '16px' }}>
-              <Upload
-                beforeUpload={(file) => {
-                  handleImageUpload(file);
-                  return false; // Prevent default upload
-                }}
-                showUploadList={false}
-                accept="image/*"
-              >
-                <Button 
-                  icon={<UploadOutlined />} 
-                  loading={uploading}
-                  disabled={uploading}
-                >
-                  Upload Image
-                </Button>
-              </Upload>
-            </div>
-            
-            <Table
-              columns={imageColumns}
-              dataSource={variant.images}
-              rowKey="id"
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} images`,
+          <div style={{ marginBottom: '16px' }}>
+            <Upload
+              beforeUpload={(file) => {
+                handleImageUpload(file);
+                return false; // Prevent default upload
               }}
-            />
-          </Card>
+              showUploadList={false}
+              accept="image/*"
+            >
+              <Button 
+                icon={<UploadOutlined />} 
+                loading={uploading}
+                disabled={uploading}
+              >
+                Upload Image
+              </Button>
+            </Upload>
+          </div>
+          
+          <DraggableImageTable
+            images={variant.images || []}
+            onImageDelete={handleDeleteImage}
+            onImageReorder={handleImageReorder}
+            loading={uploading}
+          />
         </Col>
 
         <Col span={8}>
