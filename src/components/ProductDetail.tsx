@@ -124,9 +124,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBack, onVari
 
   const variantColumns = [
     {
-      title: 'SKU',
-      dataIndex: 'sku',
-      key: 'sku',
+      title: 'Sort Order',
+      dataIndex: 'sort_order',
+      key: 'sort_order',
     },
     {
       title: 'Color',

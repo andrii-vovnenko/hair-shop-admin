@@ -12,6 +12,7 @@ import AddVariant from './AddVariant';
 import AllProducts from './AllProducts';
 import ProductDetail from './ProductDetail';
 import VariantDetail from './VariantDetail';
+import LoginForm from './LoginForm';
 
 const { Header, Content, Sider } = AntLayout;
 const { Title } = Typography;
@@ -29,6 +30,55 @@ const Layout: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [preselectedProductId, setPreselectedProductId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    setIsAuthenticated(true);
+  }
+}, []);
+
+useEffect(() => {
+  if (loginError) {
+    const timer = setTimeout(() => setLoginError(''), 4000);
+    return () => clearTimeout(timer);
+  }
+}, [loginError]);
+
+
+const handleLogin = async (username: string, password: string) => {
+  if (isAuthenticated) return; 
+
+  if (!username || !password) {
+    setLoginError('Введіть логін і пароль');
+    return;
+  }
+
+  try {
+    const res = await fetch('/v1/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: username, password }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setIsAuthenticated(true);
+      setLoginError('');
+      localStorage.setItem('token', data.token);
+    } else {
+      setLoginError('Невірний логін або пароль');
+    }
+  } catch (err) {
+    setLoginError('Помилка з’єднання з сервером');
+  }
+};
+
+
+
 
   const handleProductSelect = (productId: string) => {
     setSelectedProductId(productId);
@@ -140,6 +190,18 @@ const Layout: React.FC = () => {
   }
 
   const selectedItem = menuItems.find(item => item.key === selectedKey);
+
+  if (!isAuthenticated) {
+  return (
+    <div>
+      <LoginForm onLogin={handleLogin} />
+      {loginError && (
+  <p style={{ color: 'red', marginTop: '12px' }}>{loginError}</p>
+)}
+    </div>
+  );
+}
+
 
   return (
     <AntLayout style={{ minHeight: '100vh' }}>
