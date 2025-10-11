@@ -66,10 +66,6 @@ const handleLogin = async (username: string, password: string) => {
   }
 };
 
-
-
-
-
   const handleProductSelect = (productId: string) => {
     setSelectedProductId(productId);
     setSelectedVariantId(null);

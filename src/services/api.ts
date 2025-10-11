@@ -86,7 +86,7 @@ export interface Product {
 export interface Variant {
   id: string;
   product_id: string;
-  sort_order: number;
+  sku: string;
   price: number;
   promo_price?: number;
   color: string;
