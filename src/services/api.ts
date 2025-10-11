@@ -151,6 +151,12 @@ export interface UpdateVariantRequest {
 
 // API functions
 export const apiService = {
+  
+  login: async (email: string, password: string): Promise<{ success: boolean; token?: string }> => {
+  const response = await api.post('/v1/login', { email, password });
+  return response.data;
+},
+
   // Colors
   getColors: async (): Promise<Color[]> => {
     const response = await api.get('/v1/colors');

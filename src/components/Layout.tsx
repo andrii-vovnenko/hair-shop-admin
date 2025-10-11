@@ -13,6 +13,7 @@ import AllProducts from './AllProducts';
 import ProductDetail from './ProductDetail';
 import VariantDetail from './VariantDetail';
 import LoginForm from './LoginForm';
+import { apiService } from '../services/api';
 
 const { Header, Content, Sider } = AntLayout;
 const { Title } = Typography;
@@ -49,33 +50,22 @@ useEffect(() => {
 
 
 const handleLogin = async (username: string, password: string) => {
-  if (isAuthenticated) return; 
-
-  if (!username || !password) {
-    setLoginError('Введіть логін і пароль');
-    return;
-  }
-
   try {
-    const res = await fetch('/v1/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: username, password }),
-    });
-
-    const data = await res.json();
+    const data = await apiService.login(username, password);
 
     if (data.success) {
       setIsAuthenticated(true);
       setLoginError('');
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token || '');
     } else {
       setLoginError('Невірний логін або пароль');
     }
   } catch (err) {
+    console.error('Login error:', err);
     setLoginError('Помилка з’єднання з сервером');
   }
 };
+
 
 
 
